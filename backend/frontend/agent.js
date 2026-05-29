@@ -50,7 +50,7 @@
     window.addEventListener('scroll', resetTimer);
 })();
 
-const PROXY = 'http://localhost:3001'; 
+const PROXY = 'http:172.16.0.43:3001'; 
 let agentsData = []; // สร้างตัวแปรว่างๆ ไว้รับข้อมูลจริง
 
 // 1. ฟังก์ชันดึงข้อมูลจริงจาก Server
