@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wazuh Overview Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="overview.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+
+<!-- ══ LOADING OVERLAY ══ -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">กำลังโหลดข้อมูลจาก Wazuh...</div>
+</div>
+
+<!-- ══ TOP BAR ══ -->
+<div class="top-bar">
+  <div class="logo" onclick="window.location.reload();" style="cursor: pointer;">W<span class="dot">.</span></div>
+  <div class="top-overview">Overview</div>
+  <div class="top-bar-spacer"></div>
+  <div class="api-container">
+    <div class="api-badge" id="apiBtn">
+      <span id="apiDefault">default</span>
+      <span class="arrow">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M6 9L12 15L18 9"
+                stroke="currentColor"
+                stroke-width="2.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </div>
+    <div id="apiMenu" class="api-dropdown-content">
+      <a href="#" onclick="changeAPI('default')">default</a>
+    </div>
+  </div>
+<div class="profile-container" id="profileBtn">
+  <div class="avatar">US</div> 
+
+  <div id="profileMenu" class="profile-dropdown-content">
+    <a href="#" onclick="openRolesPopup(); return false;">View roles and identities</a>
+    <a href="#" style="color:red;" onclick="logout()">Log out</a>
+  </div>
+  <div id="rolesPopup" class="popup-overlay">
+  <div class="popup-content">
+    <div class="popup-header">
+      <h3>User identity</h3>
+      <span class="close-btn" onclick="closePopup()">&times;</span>
+    </div>
+    <div class="popup-body">
+      <p><b>Roles (2)</b></p>
+      <table style="width:100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr style="border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px 0;">all_access</td>
+          <td style="padding: 8px 0; text-align: right; color: #666;">wazuh-admin</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0;">own_index</td>
+          <td style="padding: 8px 0; text-align: right; color: #666;">wazuh-admin</td>
+        </tr>
+      </table>
+
+      <p><b>Backend roles (1)</b></p>
+      <table style="width:100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 8px 0;">admin</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+  <!-- Error banner -->
+  <div class="error-banner" id="errorBanner">
+    ⚠️ <span id="errorMsg">ไม่สามารถเชื่อมต่อ Proxy ได้ กำลังแสดงข้อมูลตัวอย่าง</span>
+  </div>
+
+
+  <!-- ── STATS ROW ── -->
+  <div class="stats-row">
+
+
+    <!-- Agents Summary -->
+    <div class="stat-card clickable" onclick="window.location.href='agent.html'">
+      <div class="card-header">
+        <span class="card-icon">🖥️</span>
+        <span class="card-title">Agents Summary</span>
+      </div>
+      <div class="donut-wrap">
+        <canvas id="donutAgents" class="donut-canvas" width="105" height="105"></canvas>
+        <div class="donut-legend">
+          <div class="leg-item" style="cursor: pointer;" onclick="event.stopPropagation(); window.location.href='agent.html?status=active'">
+            <div class="leg-dot" style="background:#4c6ef5"></div>
+            <span class="hover-text">Active (<span id="activeCount">–</span>)</span>
+          </div>
+          <div class="leg-item" style="cursor: pointer;" onclick="event.stopPropagation(); window.location.href='agent.html?status=disconnected'">
+            <div class="leg-dot" style="background:#e53e3e"></div>
+            <span class="hover-text">Disconnected (<span id="disconnCount">–</span>)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Critical Alerts -->
+    <div class="stat-card critical-card">
+
+      <!-- Header -->
+      <div class="card-header critical-header">
+        <div class="critical-title-wrap">
+          <span class="card-icon">🛡️</span>
+          <span class="card-title">Critical Alerts</span>
+        </div>
+
+        <!-- Time Presets -->
+        <div class="time-presets">
+          <button class="time-btn active" data-range="24h">24H</button>
+          <button class="time-btn" data-range="7d">7D</button>
+          <button class="time-btn" data-range="30d">30D</button>
+          <button class="time-btn" data-range="1y">1Y</button>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="critical-content">
+  <div class="critical-filter-box">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label>From</label>
+              <input type="datetime-local" id="startDate">
+            </div>
+            <div class="filter-group">
+              <label>To</label>
+              <input type="datetime-local" id="endDate">
+            </div>
+            <button class="apply-filter-btn" id="applyDateFilter">
+              Apply
+            </button>
+          </div>
+        </div>
+        <!-- Left -->
+        <div class="critical-left">
+          <div 
+            class="big-num critical-click"
+            id="critCount"
+            onclick="openCriticalAlerts()"
+          >
+            0
+          </div>
+          <div class="sub-label">รายการ</div>
+        </div>
+
+        <!-- Right -->
+       
+
+      </div>
+
+  <div class="sparkline-wrap">
+    <canvas id="sparkCrit"></canvas>
+  </div>
+
+</div>
+
+    <!-- Total Events -->
+    <div class="stat-card clickable total-events-card"
+     onclick="window.open(this.dataset.url, '_blank')"
+     data-url="https://172.15.0.38/app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'wazuh-alerts-*',view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_q=(filters:!(),query:(language:kuery,query:''))">
+
+      <div class="card-header">
+        <span class="card-icon">📊</span>
+        <span class="card-title">Total Alerts (24 hours)</span>
+      </div>
+      <div class="big-num" id="totalEvents">–</div>
+      <div class="sub-label">รายการ</div>
+      <div class="sparkline-wrap">
+        <canvas id="sparkTotal"></canvas>
+      </div>
+    </div>
+
+  </div><!-- /stats-row -->
+
+  <!-- ── MIDDLE ROW ── -->
+  <div class="middle-row">
+
+    <!-- Latest Alerts Table -->
+    <div class="alerts-card">
+      <div class="section-header">
+        <span class="sec-icon">🔔</span>
+        <span class="sec-title">Latest Alerts</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 140px;">Timestamp</th>
+            <th style="width: 50px;">Level</th>
+            <th style="width: 70px;">rule.id</th>
+            <th>Description</th>
+            <th style="width: 110px;">Agent Name</th>
+            <th style="width: 60px;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="alertsBody">
+          <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted)">กำลังโหลด...</td></tr>
+        </tbody>
+      </table>
+      <div class="view-all-row">
+        <a class="view-all-btn" href="https://172.15.0.38/app/threat-hunting#/overview/?tab=general&tabView=events&_a=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))" 
+        target="_blank">View Details in Wazuh</a>
+      </div>
+    </div>
+
+    <!-- 24h Severity -->
+    <div class="severity-card">
+      <div class="section-header">
+        <span class="sec-icon">⏱️</span>
+        <span class="sec-title">Last 24 Hours Alerts</span>
+      </div>
+
+      <div class="sev-grid">
+        <div class="sev-box sev-crit clickable"
+            data-url="https://172.15.0.38/app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'wazuh-alerts-*',view:discover))&_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:'wazuh-alerts-*',key:rule.level,negate:!f,params:(gte:15,lte:!n),type:range),range:(rule.level:(gte:15,lte:!n)))),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_q=(filters:!(),query:(language:kuery,query:''))">
+          <div class="sev-label">Critical Severity</div>
+          <div class="sev-num" id="sevCrit">–</div>
+          <div class="sev-sub">Rule level 15 or higher</div>
+        </div>
+        
+        <div class="sev-box sev-high clickable"
+            data-url="https://172.15.0.38/app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'wazuh-alerts-*',view:discover))&_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:'wazuh-alerts-*',key:rule.level,negate:!f,params:(gte:12,lte:14),type:range),range:(rule.level:(gte:12,lte:14)))),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_q=(filters:!(),query:(language:kuery,query:''))">
+          <div class="sev-label">High Severity</div>
+          <div class="sev-num" id="sevHigh">–</div>
+          <div class="sev-sub">Rule level 12 To 14</div>
+        </div>
+
+        <div class="sev-box sev-med clickable"
+            data-url="https://172.15.0.38/app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'wazuh-alerts-*',view:discover))&_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:'wazuh-alerts-*',key:rule.level,negate:!f,params:(gte:7,lte:11),type:range),range:(rule.level:(gte:7,lte:11)))),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_q=(filters:!(),query:(language:kuery,query:''))">
+          <div class="sev-label">Medium Severity</div>
+          <div class="sev-num" id="sevMed">–</div>
+          <div class="sev-sub">Rule level 7 To 11</div>
+        </div>
+
+          <div class="sev-box sev-low clickable"
+            data-url="https://172.15.0.38/app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'wazuh-alerts-*',view:discover))&_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:'wazuh-alerts-*',key:rule.level,negate:!f,params:(gte:0,lte:6),type:range),range:(rule.level:(gte:0,lte:6)))),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_q=(filters:!(),query:(language:kuery,query:''))">
+          <div class="sev-label">Low Severity</div>
+          <div class="sev-num" id="sevLow">–</div>
+          <div class="sev-sub">Rule level 0 To 6</div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+
+  <!-- ── BOTTOM ROW - 3 CARDS เหมือน Wazuh จริง ── -->
+  <div class="bottom-row ">
+
+    <!-- ⚠️ CARD 1: Top 5 Alert Types (แก้อ.)-->
+    <div class="bottom-card">
+      <div class="section-header" style="margin-bottom: 25px;">
+        <span class="sec-icon">⚠️</span>
+        <span class="sec-title">Top 5 Alert Types (24 hours)</span>
+      </div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="pieAlertTypes" width="120" height="120"></canvas>
+        </div>
+        <div class="legend-container alert-types-legend" id="alertTypesLegend">
+          <div class="loading">กำลังโหลด...</div>
+        </div>
+      </div>
+      <div class="view-all-row">
+        <a class="view-all-btn" href="https://172.15.0.38/app/wazuh#/alerts" target="_blank">View Details in Wazuh</a>
+      </div>
+    </div>
+
+    <!-- 🎯 CARD 2: Top 10 MITRE ATT&CKS -->
+    <!-- 🎯 CARD 2: Top 10 MITRE ATT&CKS -->
+    <div class="bottom-card">
+      <div class="section-header" style="margin-bottom: 25px;">
+        <span class="sec-icon">🎯</span>
+        <span class="sec-title">Top 10 MITRE ATT&CKS</span>
+      </div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="pieMitre" width="120" height="120"></canvas>
+        </div>
+        <div class="legend-container" id="mitreList">
+          <div class="loading">กำลังโหลด...</div>
+        </div>
+      </div>
+      <div class="view-all-row">
+        <a class="view-all-btn" href="https://172.15.0.38/app/threat-hunting#/overview/?tab=general&tabView=dashboard&_a=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))" 
+      target="_blank">View Details in Wazuh</a>
+      </div>
+    </div>
+
+    <!-- 🖥️ CARD 3: Top 5 Agents (LIST ไม่ใช่ DONUT) -->
+    <div class="bottom-card">
+      <div class="section-header">
+        <span class="sec-icon">🖥️</span>
+        <span class="sec-title">Top 5 Agents</span>
+        <div style="flex:1"></div>
+        <span style="font-size:10px;color:var(--muted);font-weight:600">Count</span>
+      </div>
+      <div class="card-body-list">
+        <ul class="agents-list" id="agentsList">
+          <li class="loading">กำลังโหลด...</li>
+        </ul>
+      </div>
+      <div class="view-all-row">
+        <a class="view-all-btn" href="https://172.15.0.38/app/threat-hunting#/overview/?tab=general&tabView=dashboard&_a=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))" 
+        target="_blank">View Details in Wazuh</a>
+      </div>
+    </div>
+
+  </div><!-- /bottom-row -->
+
+</div><!-- /main -->
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<!-- Dashboard logic -->
+<script src="overview.js"></script>
+
+</body>
+</html>

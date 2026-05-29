@@ -1,0 +1,587 @@
+/* style.css */
+
+:root {
+    --primary-blue: #2563eb;
+    --bg-gray: #f4f5f6;
+    --text-main: #a4a4a4;
+    --border-color: #d5d5d5;
+    --row-hover: #ff0000;
+    --danger-bg: #fde8e8; /* พื้นหลังแถวสีแดงอ่อน สำหรับ Disconnected */
+    --status-active: #22c55e; /* สีเขียว */
+    --status-disconnected: #ef4444; /* สีแดง */
+
+    --bg: #f0f2f8;
+    --surface: #ffffff;
+    --border: #dde1ec;
+    --text: #1a1d2e;
+    --muted: #6b7280;
+    --blue: #4c6ef5;
+    --blue-light: #e8edff;
+    --header-h: 68px;
+}
+
+html, body {
+  font-family: 'Sarabun', sans-serif;
+  background-color: var(--bg) !important;
+  color: var(--text) !important; /* บังคับให้ตัวหนังสือคมชัด ไม่จาง */
+  font-size: 13px;
+}
+
+main {
+  margin-top: var(--header-h);
+}
+
+.top-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 28px; /* เดิม 20px */
+  gap: 14px;
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+
+/* ─── LOGO & HEADER TITLE (อิงจาก Overview) ─── */
+.logo {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text, #1a1d2e);
+  letter-spacing: -0.5px;
+  border-radius: 50%;
+  background: rgba(76, 110, 245, 0.08);
+  border: 1.5px solid rgba(76, 110, 245, 0.18);
+  box-shadow:
+    0 4px 10px rgba(76,110,245,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+  backdrop-filter: blur(4px);
+  transition: all 0.25s ease;
+}
+
+.logo .dot {
+  color: #4c6ef5 !important;
+  font-weight: bold;
+}
+
+.logo:hover {
+  transform: translateY(-1px) scale(1.03);
+  border-color: rgba(76,110,245,0.35);
+  box-shadow:
+    0 8px 18px rgba(76,110,245,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+.top-overview {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(90deg, #4c6ef5, #7c8cff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.8px;
+  line-height: 1;
+}
+
+
+.top-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+
+.top-bar-spacer { flex: 1; }
+.api-container {
+  position: relative;
+  display: inline-block;
+  margin-left: auto;
+}
+
+.api-badge {
+  background-color: #ffffff;
+  color: var(--text);
+  border: 1px solid var(--border);
+  
+  /* ── 🎯 ล็อกความสูงและระยะให้คงที่ ── */
+  height: 33px;                  /* กำหนดความสูงให้แน่นอน */
+  padding: 0 16px;               /* ระยะเยื้องซ้าย-ขวาภายในกรอบ */
+  border-radius: 8px;            /* ความโค้งของมุม */
+  
+  /* ── จัดระเบียบให้อยู่กึ่งกลาง ── */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.api-badge:hover {
+  background-color: var(--blue-light);
+  border-color: #c7d3ff;
+  color: var(--blue);
+}
+.arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: #111;
+}
+
+.arrow svg {
+  width: 18px;
+  height: 18px;
+}
+
+.api-dropdown-content {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background-color: #ffffff;
+  /* ── 🎯 แก้ไขมิติให้ตรงกับปุ่มบนทุกมิติ ── */
+  width: 100%;                  /* ความกว้างยึดตามปุ่มบน 100% */
+  height: 33px;                 /* 💡 ล็อกความสูงให้เท่ากับตัว .api-badge ด้านบนพอดีเป๊ะ */
+  border-radius: 8px;           /* 💡 มิติความโค้งเท่ากัน */
+  padding: 0;                   /* 💡 ล้างค่า padding เก่าออก เพื่อไม่ให้กล่องขยายอ้วนขึ้น */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+/* ปรับระยะปุ่มกดข้างในดรอปดาวน์ให้จัดกึ่งกลางและพอดีกล่อง */
+.api-dropdown-content a {
+  color: var(--text);
+  text-decoration: none;
+  /* ── จัดการให้อยู่กึ่งกลางกล่องพอดี ── */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;      /* จัดข้อความให้อยู่ตรงกลางเป๊ะ */
+  width: 100%;
+  height: 100%;                 /* สูงเต็มกรอบดรอปดาวน์ */
+  font-size: 13px;              /* ขนาดตัวอักษรเท่าด้านบน */
+  font-weight: 500;
+  padding-left: 16px;
+}
+
+.api-dropdown-content a:hover {
+  background-color: var(--blue-light);
+  color: var(--blue);
+}
+
+.api-dropdown-content.show {
+  display: block;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #8da4ff;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.help-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+/* Charts Section */
+.chart-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.chart-title {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 2px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+/* Table Section */
+.table-container {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow-x: auto;
+}
+.search-bar {
+    background-color: #f9fafb;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Table Styles */
+table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+th {
+  color: var(--muted) !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px;
+}
+td {
+  color: var(--text) !important;  /* ตัวหนังสือในตารางจะเข้มอ่านง่ายเหมือนหน้าแรก */
+  font-size: 13px !important;
+}
+
+/* จุดสถานะและแถว Disconnected อ้างอิงจากภาพต้นแบบ */
+.status-dot {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.status-active { background-color: var(--status-active); }
+.status-disconnected { background-color: var(--status-disconnected); }
+
+.row-disconnected {
+    background-color: var(--danger-bg) !important;
+}
+.group-badge {
+    background-color: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+
+/* ปุ่มmore */
+    /* ทำให้เมนูที่ยังไม่ได้เลือกดูเหมือนกดไม่ได้ */
+.menu-item.disabled {
+    color: #9ca3af !important; /* text-gray-400 */
+    pointer-events: none;      /* ห้ามคลิก */
+    opacity: 0.6;
+}
+
+/* เพิ่มเติมเพื่อให้สมบูรณ์ขึ้น */
+.menu-item {
+    transition: all 0.2s ease; /* เพิ่มความนุ่มนวลเวลาเปลี่ยนสถานะ */
+}
+
+/* ตรวจสอบว่าเมนู More อยู่เหนือตารางเสมอ */
+#moreMenu {
+    z-index: 100;
+    transition: all 0.15s ease;
+}
+#moreBtn.active {
+    color: #2563eb;
+}
+
+/* เพิ่ม Style ให้กับหัวตารางที่มี Checkbox (Select All) */
+th input[type="checkbox"], 
+td input[type="checkbox"] {
+    cursor: pointer;
+}
+#moreBtn {
+    cursor: pointer;
+}
+#moreMenu {
+    z-index: 100;
+    transition: all 0.15s ease;
+    transform-origin: top right;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ef4444; /* สีแดงเดิมตามภาพ */
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none; /* ลบเส้นใต้ของลิงก์ */
+    font-size: 15px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+/* เอฟเฟกต์ตอนเอาเมาส์ไปวาง */
+.back-btn:hover {
+    background-color: #dc2626; /* สีแดงจะเข้มขึ้นเล็กน้อยเวลาชี้ */
+    color: #ffffff;
+}
+
+
+.profile-container {
+  position: relative;
+  cursor: pointer;
+}
+
+.profile-icon img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+}
+
+.profile-dropdown-content {
+  display: none; /* ซ่อนไว้ก่อน */
+  position: absolute;
+  right: 0;
+  background-color: var(--surface);
+  min-width: 150px;
+  box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  z-index: 1000;
+  margin-top: 10px;
+}
+
+.profile-dropdown-content a {
+  color: var(--text);
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.profile-dropdown-content a:hover {
+  background-color: #f8fafc;
+}
+/* จัดกลุ่มเมนูด้านขวาให้เรียงกันและมีระยะห่าง */
+.right-menu {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* ระยะห่างระหว่างปุ่ม API, Profile, และ Help */
+}
+
+/* ทำให้ profile-container รองรับ dropdown */
+.profile-container {
+  position: relative;
+  cursor: pointer;
+}
+
+/* ปรับ Avatar ให้สวยงามเหมือนในภาพ */
+.avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: #4c6ef5;
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* ตรวจสอบว่า Dropdown ของ Profile แสดงผลถูกต้อง */
+#profileMenu {
+  right: 0;
+  top: 100%;
+  margin-top: 10px;
+}
+/* เพิ่มส่วนนี้ใน overview.css เพื่อรองรับ Logic .show */
+.profile-dropdown-content {
+  display: none; /* ซ่อนไว้ปกติ */
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 10px;
+  background-color: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 1000;
+  min-width: 180px;
+  padding: 5px 0;
+}
+
+.profile-dropdown-content.show {
+  display: block; /* เมื่อมีคลาส show ให้แสดง */
+}
+
+.popup-overlay {
+  display: none; 
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 350px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.close-btn { cursor: pointer; font-size: 20px; font-weight: bold; }
+/* ตกแต่งเนื้อหาใน Popup */
+.popup-body {
+  font-size: 14px;
+  color: #333;
+}
+.popup-content h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #1a1d2e;
+}
+.popup-header {
+  border-bottom: 2px solid #f0f2f8;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+.show {
+  display: block;
+}
+input, select, button {
+  font-family: 'sarabun', sans-serif !important;
+  color: var(--text) !important;
+}
+#stat-active, 
+#stat-disconnected {
+    font-size: 30px !important;      /* 💡 เปลี่ยนตัวเลขตรงนี้ให้ใหญ่ตามต้องการ เช่น 42px, 48px, หรือ 50px */
+    font-weight: 800 !important;     /* ความหนา */
+    line-height: 1 !important;
+    margin-top: 5px !important;
+    display: inline-block;
+}
+
+div[onclick*="status=active"] p,
+div[onclick*="status=disconnected"] p {
+    font-size: 10px !important;       /* 💡 ปรับขนาดตัวอักษรที่นี่ (เช่น 14px, 15px, 16px) */
+    color: #6b7280 !important;        /* ทำให้สีเข้มขึ้นจากเดิมนิดนึง เพื่อให้อ่านง่ายและชัดเจนขึ้น */
+    letter-spacing: 0.5px !important; /* จัดระยะห่างตัวอักษรให้ดูโปร่งสวยงาม */
+    font-weight: 600 !important;      /* บังคับความหนาของตัวอักษร */
+}
+
+/* บังคับขยายขนาดหัวข้อ Top 5 OS และ Top 5 Groups */
+div > p.uppercase.tracking-wider {
+    font-size: 15px !important;       /* ขนาดตัวอักษร */
+    color: #6b7280 !important;        /* สีเทาที่เข้มขึ้น */
+    font-weight: 600 !important;      /* ความหนา */
+}
+
+/* ═══════════════════════════════════════════════
+   ปรับขนาดข้อมูลรายชื่อใน Top 5 OS และ Top 5 Groups
+═══════════════════════════════════════════════ */
+
+/* 1. ปรับขนาดตัวหนังสือชื่อ OS และ Group */
+#top-os-list li span,
+#top-groups-list li span {
+    font-size: 14px !important;       /* 💡 ปรับขนาดชื่อ (เช่น Windows, Linux, default) ให้ใหญ่ขึ้น */
+    color: #1a1d2e !important;        /* สีตัวหนังสือให้เข้มคมชัด */
+    font-weight: 500 !important;      /* เพิ่มความหนาให้อ่านง่าย */
+}
+
+/* 2. ปรับขนาดกรอบตัวเลข (Badge) ด้านหลัง */
+#top-os-list li span:last-child,
+#top-groups-list li span:last-child {
+    font-size: 12px !important;       /* 💡 ปรับขนาดตัวเลขจำนวนเครื่อง */
+    font-weight: 700 !important;      /* ให้ตัวเลขหนาและเด่นขึ้น */
+    color: #4c6ef5 !important;        /* ตัวเลขสีน้ำเงิน */
+    background-color: #e8edff !important; /* พื้นหลังสีฟ้าอ่อน */
+    padding: 3px 10px !important;     /* เพิ่มพื้นที่กรอบให้สวยขึ้น */
+    border-radius: 12px !important;
+}
+
+/* 3. ปรับขนาดไอคอนด้านหน้า (รูปคอมพิวเตอร์ / แฟ้ม) */
+#top-os-list li i,
+#top-groups-list li i {
+    font-size: 15px !important;       /* 💡 ปรับขนาดไอคอนให้พอดีกับข้อความ */
+    margin-right: 8px !important;
+}
+
+/* 4. ปรับระยะห่างแต่ละบรรทัดให้โปร่งขึ้น */
+#top-os-list li,
+#top-groups-list li {
+    padding: 8px 6px !important;      /* เพิ่มระยะเว้นบรรทัดบน-ล่าง ไม่ให้ดูอึดอัด */
+}
+
+.selected-badge {
+    font-size: 13px !important;            /* ขนาดตัวอักษร text-sm */
+    background-color: #eff6ff !important;  /* สีพื้นหลัง bg-blue-50 */
+    color: #2563eb !important;             /* สีตัวอักษร text-blue-600 */
+    padding: 4px 10px !important;          /* ระยะขอบ px-3 py-1 */
+    border-radius: 9999px !important;      /* ขอบโค้งมน rounded-full */
+    font-weight: 500 !important;           /* ความหนา font-medium */
+    display: inline-block;
+    transition: all 0.2s ease-in-out;      /* เพิ่มเอฟเฟกต์ให้ตอนโผล่มาดูนุ่มนวลขึ้น */
+}
+
+/* เอาไว้ใช้ซ่อนป้ายเวลาที่ยังไม่ได้เลือกอะไร */
+.selected-badge.hidden {
+    display: none !important;
+}
+
+html,
+body,
+table,
+thead,
+tbody,
+tr,
+td,
+th,
+input,
+select,
+textarea,
+button,
+span,
+div,
+p,
+a,
+h1,h2,h3,h4,h5,h6 {
+    font-family: 'Sarabun', sans-serif !important;
+}

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wazuh Endpoint Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">    
+    <link rel="stylesheet" href="agent.css">
+
+    <style>
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-active { background-color: #22c55e; }
+        .status-disconnected { background-color: #ef4444; }
+        .row-disconnected { background-color: #fee2e2; }
+    </style>
+</head>
+        <body class="bg-[#f4f7f9]"> 
+            <!-- ══ TOP BAR ══ -->
+<div class="top-bar">
+  <div class="logo" onclick="window.location.reload();" style="cursor: pointer;">W<span class="dot">.</span></div>
+  <div class="top-overview">Agents</div>
+  <div class="top-bar-spacer"></div>
+  <div class="api-container">
+    <div class="api-badge" id="apiBtn">
+      <span id="apiDefault">default</span>
+      <span class="arrow">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M6 9L12 15L18 9"
+                stroke="currentColor"
+                stroke-width="2.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </div>
+    <div id="apiMenu" class="api-dropdown-content">
+      <a href="#" onclick="changeAPI('default')">default</a>
+    </div>
+  </div>
+<div class="profile-container" id="profileBtn">
+  <div class="avatar">US</div> 
+
+  <div id="profileMenu" class="profile-dropdown-content">
+    <a href="#" onclick="openRolesPopup(); return false;">View roles and identities</a>
+    <a href="#" style="color:red;" onclick="logout()">Log out</a>
+  </div>
+  <div id="rolesPopup" class="popup-overlay">
+  <div class="popup-content">
+    <div class="popup-header">
+      <h3>User identity</h3>
+      <span class="close-btn" onclick="closePopup()">&times;</span>
+    </div>
+    <div class="popup-body">
+      <p><b>Roles (2)</b></p>
+      <table style="width:100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr style="border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px 0;">all_access</td>
+          <td style="padding: 8px 0; text-align: right; color: #666;">wazuh-admin</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0;">own_index</td>
+          <td style="padding: 8px 0; text-align: right; color: #666;">wazuh-admin</td>
+        </tr>
+      </table>
+
+      <p><b>Backend roles (1)</b></p>
+      <table style="width:100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 8px 0;">admin</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+<div id="rolesPopup" class="popup-overlay">
+  <div class="popup-content">
+    <div class="popup-header">
+      <h3>User identity</h3>
+      <span class="close-btn" onclick="closePopup()">&times;</span>
+    </div>
+
+    <div class="popup-body">
+      <p><b>Roles (2)</b></p>
+
+      <table style="width:100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr style="border-bottom: 1px solid #ddd;">
+          <td style="padding: 8px 0;">all_access</td>
+          <td style="padding: 8px 0; text-align: right; color: #666;">wazuh-admin</td>
+        </tr>
+
+        <tr>
+          <td style="padding: 8px 0;">own_index</td>
+          <td style="padding: 8px 0; text-align: right; color: #666;">wazuh-admin</td>
+        </tr>
+      </table>
+
+      <p><b>Backend roles (1)</b></p>
+
+      <table style="width:100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 8px 0;">admin</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+
+    <main class="p-4 md:p-6 max-w-[1400px] mx-auto space-y-8 mt-20">
+
+    <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back To Overview
+    </a>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    
+        <div class="bg-white border border-[#dde1ec] rounded-[10px] p-4 shadow-sm border-l-4 border-green-500 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md cursor-pointer" onclick="window.location.href='agent.html?status=active'">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1 mt-3">
+                      Active Agents</p>
+                    <h3 id="stat-active" class="text-3xl font-bold text-[#1a1d2e]">0</h3>
+                </div>
+                <div class="p-3 bg-green-50 rounded-lg text-green-500">
+                    <i class="fas fa-check-circle text-3xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-[#dde1ec] rounded-[10px] p-4 shadow-sm border-l-4 border-red-500 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md cursor-pointer" onclick="window.location.href='agent.html?status=disconnected'">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1 mt-3">
+                      Disconnected Agents</p>
+                    <h3 id="stat-disconnected" class="text-3xl font-bold text-[#1a1d2e]">0</h3>
+                </div>
+                <div class="p-2 bg-red-50 rounded-lg text-red-500">
+                    <i class="fas fa-exclamation-triangle text-3xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-[#dde1ec] rounded-[10px] p-4 shadow-sm border-l-4 border-blue-500 min-h-[115px] flex flex-col justify-between">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-1 mb-1">
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">	Operating system</p>
+                <div class="text-blue-500"><i class="fab fa-windows text-3xl"></i></div>
+            </div>
+            <div id="top-os-list" class="text-[11px] text-gray-600 space-y-1 overflow-y-auto max-h-[70px] pr-1 flex-1">
+                <div class="text-gray-400 italic text-center py-2">Loading data...</div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-[#dde1ec] rounded-[10px] p-4 shadow-sm border-l-4 border-purple-500 min-h-[115px] flex flex-col justify-between">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-1 mb-1">
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Groups</p>
+                <div class="text-purple-500"><i class="fas fa-folder text-3xl"></i></div>
+            </div>
+            <div id="top-groups-list" class="text-[11px] text-gray-600 space-y-1 pr-1 flex-1
+                <div class="text-gray-400 italic text-center py-2">Loading data...</div>
+            </div>
+        </div>
+
+    </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-4 flex flex-col md:flex-row md:items-center justify-between border-b border-gray-100 gap-4">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                  Agents <span id="page-agent-count"></span>
+                  <span id="selected-count" class="selected-badge hidden">0 selected</span>
+              </h2>
+            </div>
+
+            <div class="p-2 bg-gray-50 border-b border-gray-100 flex items-center px-4">
+                <i class="fas fa-search text-gray-400 mr-2 text-xs"></i>
+                <input type="text" id="searchInput" class="w-full bg-transparent border-none focus:ring-0 text-sm outline-none text-gray-600 py-1" placeholder="Search agents...">                <button class="text-blue-400 font-bold text-[10px] px-3 border-l border-gray-200 ml-2">WQL</button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-[13px] text-gray-600 whitespace-nowrap">
+                    <thead class="bg-white border-b border-gray-200 text-gray-500 uppercase text-[11px] tracking-wider">
+                        <tr>
+                            <th class="py-4 px-4 w-10 text-center"><input type="checkbox" id="selectAll" class="rounded border-gray-300 shadow-sm"></th>
+                            <th class="py-4 px-2 font-semibold">ID</th>
+                            <th class="py-4 px-2 font-semibold">Name</th>
+                            <th class="py-4 px-2 font-semibold">IP Address</th>
+                            <th class="py-4 px-2 font-semibold">Group(s)</th>
+                            <th class="py-4 px-2 font-semibold">Operating system</th>
+                            <th class="py-4 px-2 font-semibold">Cluster node</th>
+                            <th class="py-4 px-2 font-semibold">Version</th>
+                            <th class="py-4 px-2 font-semibold text-center">Status</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="agents-tbody"></tbody>
+                </table>
+            </div> 
+
+        </div>
+    </main>
+
+    <script src="agent.js"></script>
+</body>
+</html>
