@@ -3,9 +3,10 @@
     ✅ ดึงข้อมูล API จริง + อัปเดต Charts
   ═══════════════════════════════════════════════ */
 
-  const PROXY = 'http://localhost:3001';
+  const PROXY = 'http:172.16.0.43:3001';
   const REFRESH_INTERVAL = 30000; 
 
+    let url = '/api/overview';
   // ═══════════════════════════════════════════════
   // 🔐 LOGIN CHECK & 5-MINUTES AUTOLOGOUT
   // ═══════════════════════════════════════════════
@@ -66,7 +67,7 @@
     try {
       console.log(`📡 [${new Date().toLocaleTimeString()}] Fetching API...`);
       
-      let url = `${PROXY}/api/overview`;
+      let url = '/api/overview';
 
 // ✅ ดึงค่าจาก date filter
       const start = document.getElementById('startDate')?.value;
@@ -125,7 +126,7 @@ async function loadCriticalAlertsOnly() {
     const start = document.getElementById('startDate').value;
     const end = document.getElementById('endDate').value;
 
-    let url = `${PROXY}/api/overview`;
+    let url = '/api/overview';
 
     if (start && end) {
       url += `?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`;
